@@ -96,7 +96,7 @@ def seed_radicals(db: Session) -> None:
             )
 
         generated_examples = examples_for(number, character, radical.meaning_ru)
-        if radical.status == "draft" or not radical.examples or has_generated_examples(radical):
+        if radical.status == "draft" or len(radical.examples) < 4 or has_generated_examples(radical):
             replace_examples(db, radical, generated_examples)
         elif not radical.examples:
             db.add(

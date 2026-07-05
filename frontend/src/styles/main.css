@@ -1549,7 +1549,7 @@ select:focus-visible {
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(260px, 350px) minmax(0, 1fr) minmax(220px, 0.78fr);
-  grid-template-rows: minmax(250px, 1fr) minmax(168px, 0.56fr) 44px;
+  grid-template-rows: minmax(230px, 1fr) minmax(230px, 0.72fr) 44px;
   height: 100%;
   min-height: 0;
 }
@@ -1751,19 +1751,19 @@ select:focus-visible {
 
 .example-card {
   border-radius: 6px;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
-  padding: 9px;
+  padding: 8px;
 }
 
 .example-head {
-  gap: 8px;
-  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 7px;
+  grid-template-columns: 38px minmax(0, 1fr);
 }
 
 .example-character {
   color: var(--text-strong);
-  font-size: 34px;
+  font-size: 31px;
 }
 
 .example-head strong {
@@ -1771,9 +1771,9 @@ select:focus-visible {
 }
 
 .example-card p {
-  font-size: 13px;
-  line-height: 1.35;
-  -webkit-line-clamp: 3;
+  font-size: 12px;
+  line-height: 1.3;
+  -webkit-line-clamp: 2;
 }
 
 .sentence-box {
@@ -1781,18 +1781,35 @@ select:focus-visible {
   border-left-color: var(--teal);
   border-radius: 6px;
   gap: 2px;
-  padding: 8px 9px;
+  padding: 7px 8px;
 }
 
 .sentence-box strong {
   color: var(--text-strong);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .sentence-box span {
   font-size: 12px;
   line-height: 1.28;
   -webkit-line-clamp: 1;
+}
+
+.radical-mark {
+  background: color-mix(in srgb, var(--teal) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teal) 36%, transparent);
+  border-radius: 4px;
+  color: var(--teal-strong);
+  font-family: "Noto Serif CJK SC", STSong, SimSun, serif;
+  font-weight: 900;
+  padding: 0 2px;
+}
+
+.example-character .radical-mark {
+  background: color-mix(in srgb, var(--teal) 24%, transparent);
+  border-color: var(--teal);
+  box-shadow: inset 0 -0.16em 0 color-mix(in srgb, var(--teal) 30%, transparent);
+  padding: 0 3px;
 }
 
 .confusable-list {
@@ -1845,6 +1862,53 @@ select:focus-visible {
   color: var(--text);
   font-size: 13px;
   line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.form-list {
+  display: grid;
+  gap: 7px;
+}
+
+.form-card {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 7px 8px;
+}
+
+.form-card > span {
+  color: var(--teal-strong);
+  font-family: "Noto Serif CJK SC", STSong, SimSun, serif;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.form-card div {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.form-card strong {
+  color: var(--text-strong);
+  font-size: 12px;
+}
+
+.form-card p {
+  color: var(--muted);
+  display: -webkit-box;
+  font-size: 12px;
+  line-height: 1.25;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
@@ -1990,7 +2054,7 @@ select:focus-visible {
 
   .focus-layout {
     grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
-    grid-template-rows: minmax(220px, 1fr) minmax(130px, 0.45fr) minmax(140px, 0.5fr) 44px;
+    grid-template-rows: minmax(210px, 1fr) minmax(130px, 0.42fr) minmax(220px, 0.7fr) 44px;
   }
 
   .focus-glyph {
@@ -2096,7 +2160,7 @@ select:focus-visible {
 
   .focus-layout {
     grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1fr);
-    grid-template-rows: minmax(240px, auto) minmax(132px, auto) minmax(132px, auto) 44px;
+    grid-template-rows: minmax(240px, auto) minmax(132px, auto) minmax(220px, auto) 44px;
     height: auto;
   }
 
@@ -2263,7 +2327,7 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .example-list .example-card:nth-child(n + 2) {
+  .example-list .example-card:nth-child(n + 4) {
     display: none;
   }
 
@@ -2317,7 +2381,7 @@ select:focus-visible {
   }
 
   .focus-layout {
-    grid-template-rows: minmax(210px, 1fr) minmax(132px, 0.5fr) 40px;
+    grid-template-rows: minmax(200px, 1fr) minmax(132px, 0.5fr) minmax(180px, 0.58fr) 40px;
   }
 
   .focus-summary {

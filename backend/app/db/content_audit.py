@@ -60,8 +60,8 @@ def audit_seed_data() -> dict[str, int]:
 
         examples = examples_for(number, character, meaning_ru)
         total_examples += len(examples)
-        if not examples:
-            issues.append(f"Radical {number} has no examples")
+        if len(examples) < 4:
+            issues.append(f"Radical {number} must have at least 4 examples")
         for example in examples:
             if len(example) != 7:
                 issues.append(f"Radical {number} example has invalid shape")

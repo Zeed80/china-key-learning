@@ -732,11 +732,48 @@ def default_examples(number: int, radical_character: str, meaning_ru: str) -> li
     return examples
 
 
+def supplemental_examples(
+    number: int,
+    radical_character: str,
+    meaning_ru: str,
+    existing: list[tuple[str, str, str, str, str, str, str]],
+) -> list[tuple[str, str, str, str, str, str, str]]:
+    forms = [radical_character, *[form for form, _, _, _ in VARIANTS.get(number, [])]]
+    examples: list[tuple[str, str, str, str, str, str, str]] = []
+    seen_characters = {item[0] for item in existing}
+
+    for form in forms:
+        if form in seen_characters:
+            continue
+        note = (
+            f"Разбор: «{form}» — форма ключа «{radical_character}». "
+            "Тренируйте быстрый визуальный захват: сначала найдите саму форму, затем свяжите ее со смысловой зоной."
+        )
+        sentence_zh, sentence_pinyin, sentence_ru = sentence_for_example(form, "", form)
+        examples.append((form, "", f"форма ключа: {meaning_ru}", note, sentence_zh, sentence_pinyin, sentence_ru))
+        seen_characters.add(form)
+
+    example_character, pinyin, translation_ru = SIMPLE_EXAMPLES.get(number, (radical_character, "", meaning_ru))
+    form = preferred_form(number, radical_character)
+    while len(existing) + len(examples) < 4:
+        index = len(existing) + len(examples) + 1
+        note = (
+            f"Разбор: повтор {index}: в «{example_character}» снова найдите «{form}». "
+            "Повторение одного и того же ключа в коротком примере закрепляет зрительное узнавание без новой теории."
+        )
+        sentence_zh, sentence_pinyin, sentence_ru = sentence_for_example(example_character, pinyin, form)
+        examples.append((example_character, pinyin, f"{translation_ru}; повтор {index}", note, sentence_zh, sentence_pinyin, sentence_ru))
+
+    return examples
+
+
 def examples_for(number: int, radical_character: str, meaning_ru: str) -> list[tuple[str, str, str, str, str, str, str]]:
     curated = EXAMPLES.get(number)
     if curated:
-        return [enrich_example(number, radical_character, item) for item in curated]
-    return default_examples(number, radical_character, meaning_ru)
+        examples = [enrich_example(number, radical_character, item) for item in curated]
+    else:
+        examples = default_examples(number, radical_character, meaning_ru)
+    return examples + supplemental_examples(number, radical_character, meaning_ru, examples)
 
 
 def auto_confusable(number: int, strokes: int) -> tuple[str, str]:

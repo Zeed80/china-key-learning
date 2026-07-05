@@ -179,8 +179,8 @@ export function OverviewPage() {
             </article>
 
             <ConfusableBlock current={radical.character} confusables={radical.confusables} />
-            <ExampleBlock examples={radical.examples} />
-            <InfoBlock title="Формы" items={radical.variants.map((item) => `${item.form} · ${item.position} · ${item.note_ru}`)} />
+            <ExampleBlock radical={radical} examples={radical.examples} />
+            <FormsBlock radical={radical} />
 
             <div className="focus-actions">
               <button className="secondary" disabled={seen.isPending} onClick={() => seen.mutate(radical.id)} type="button">
@@ -210,8 +210,9 @@ function VariantStrip({ radical }: { radical: Radical }) {
   );
 }
 
-function ExampleBlock({ examples }: { examples: RadicalExample[] }) {
-  const visible = examples.slice(0, 3);
+function ExampleBlock({ radical, examples }: { radical: Radical; examples: RadicalExample[] }) {
+  const forms = radicalForms(radical);
+  const visible = examples.slice(0, 6);
   return (
     <div className="example-block">
       <div className="section-title">
@@ -223,18 +224,26 @@ function ExampleBlock({ examples }: { examples: RadicalExample[] }) {
           {visible.map((item) => (
             <article className="example-card" key={`${item.character}-${item.pinyin}-${item.translation_ru}`}>
               <div className="example-head">
-                <span className="example-character">{item.character}</span>
+                <span className="example-character">
+                  <HighlightForms text={item.character} forms={forms} />
+                </span>
                 <div>
                   <strong>{item.translation_ru}</strong>
                   <span>{item.pinyin || "pinyin уточняется"}</span>
                 </div>
               </div>
-              <p>{item.note_ru}</p>
+              <p>
+                <HighlightForms text={item.note_ru} forms={forms} />
+              </p>
               {item.sentence_zh || item.sentence_ru ? (
                 <div className="sentence-box">
-                  <strong>{item.sentence_zh}</strong>
+                  <strong>
+                    <HighlightForms text={item.sentence_zh} forms={forms} />
+                  </strong>
                   <span>{item.sentence_pinyin}</span>
-                  <span>{item.sentence_ru}</span>
+                  <span>
+                    <HighlightForms text={item.sentence_ru} forms={forms} />
+                  </span>
                 </div>
               ) : null}
             </article>
@@ -244,6 +253,29 @@ function ExampleBlock({ examples }: { examples: RadicalExample[] }) {
         <span className="muted">Примеры еще не добавлены.</span>
       )}
     </div>
+  );
+}
+
+function radicalForms(radical: Radical): string[] {
+  return Array.from(new Set([radical.character, ...radical.variants.map((item) => item.form)])).sort((a, b) => b.length - a.length);
+}
+
+function HighlightForms({ text, forms }: { text: string; forms: string[] }) {
+  if (!text || !forms.length) return <>{text}</>;
+  const escaped = forms.map((form) => form.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp(`(${escaped.join("|")})`, "g");
+  return (
+    <>
+      {text.split(pattern).map((part, index) =>
+        forms.includes(part) ? (
+          <mark className="radical-mark" key={`${part}-${index}`}>
+            {part}
+          </mark>
+        ) : (
+          <span key={`${part}-${index}`}>{part}</span>
+        ),
+      )}
+    </>
   );
 }
 
@@ -334,23 +366,45 @@ export function autoMark(text: string): string[] {
   return parts;
 }
 
-function InfoBlock({ title, items }: { title: string; items: string[] }) {
-  const visible = items.slice(0, 4);
+function FormsBlock({ radical }: { radical: Radical }) {
+  const forms = [
+    { form: radical.character, position: "base", note_ru: "Базовая форма ключа." },
+    ...radical.variants,
+  ].slice(0, 6);
   return (
-    <div className="info-block">
+    <div className="info-block forms-block">
       <div className="section-title">
-        <h3>{title}</h3>
-        <span>{items.length}</span>
+        <h3>Формы</h3>
+        <span>{forms.length}</span>
       </div>
-      {visible.length ? (
-        <ul>
-          {visible.map((item) => (
-            <li key={item}>{item}</li>
+      {forms.length ? (
+        <div className="form-list">
+          {forms.map((item) => (
+            <article className="form-card" key={`${item.form}-${item.position}`}>
+              <span>{item.form}</span>
+              <div>
+                <strong>{positionLabel(item.position)}</strong>
+                <p>{item.note_ru}</p>
+              </div>
+            </article>
           ))}
-        </ul>
+        </div>
       ) : (
         <span className="muted">Нет данных</span>
       )}
     </div>
   );
+}
+
+function positionLabel(position: string) {
+  const labels: Record<string, string> = {
+    base: "основа",
+    left: "слева",
+    right: "справа",
+    top: "сверху",
+    bottom: "снизу",
+    enclosure: "рамка",
+    any: "вариант",
+  };
+  return labels[position] ?? position;
 }
