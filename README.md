@@ -58,6 +58,40 @@ cd china-key-learning
 ADMIN_EMAIL="you@example.com" ADMIN_PASSWORD="change-this-password" ./scripts/install.sh --docker
 ```
 
+## Автозапуск после перезагрузки сервера
+
+Для постоянного сервера используйте Docker-режим с systemd-автозапуском:
+
+```bash
+ADMIN_EMAIL="you@example.com" ADMIN_PASSWORD="change-this-password" SECRET_KEY="change-this-secret" ./scripts/install.sh --docker --autostart
+```
+
+Если приложение открывается с другого устройства в сети, передайте IP сервера:
+
+```bash
+HOST_IP=192.168.1.246 ADMIN_EMAIL="you@example.com" ADMIN_PASSWORD="change-this-password" SECRET_KEY="change-this-secret" ./scripts/install.sh --docker --autostart
+```
+
+Что это делает:
+
+- добавляет Docker restart policy `unless-stopped` для PostgreSQL, Redis, backend и frontend;
+- создает `.runtime/docker.env` с параметрами запуска;
+- устанавливает и включает systemd-unit `china-key-learning.service`;
+- при reboot systemd заново выполнит `docker compose -f infra/docker-compose.yml --env-file .runtime/docker.env up -d`.
+
+Проверить автозапуск:
+
+```bash
+systemctl status china-key-learning.service
+docker compose -f infra/docker-compose.yml ps
+```
+
+Отключить автозапуск:
+
+```bash
+sudo systemctl disable --now china-key-learning.service
+```
+
 ## Локальный запуск без Docker
 
 Установщик создаст Python virtualenv, поставит backend-зависимости, выполнит `npm ci`, соберет frontend, засеет базу и запустит dev-серверы:

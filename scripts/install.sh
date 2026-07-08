@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="auto"
 START_SERVICES="1"
+ENABLE_AUTOSTART="0"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin12345}"
 BACKEND_PORT="${BACKEND_PORT:-8001}"
@@ -15,17 +16,19 @@ usage() {
 China Key Learning installer
 
 Usage:
-  ./scripts/install.sh [--docker|--local] [--no-start]
+  ./scripts/install.sh [--docker|--local] [--no-start] [--autostart]
 
 Environment:
   ADMIN_EMAIL       Admin user email. Default: admin@example.com
   ADMIN_PASSWORD    Admin user password. Default: admin12345
   BACKEND_PORT      Backend port for local mode. Default: 8001
   FRONTEND_PORT     Frontend port for local mode. Default: 5173
-  HOST_IP           Public host/IP for local Vite API URL. Default: localhost
+  HOST_IP           Public host/IP for Docker and local mode. Default: localhost
+  SECRET_KEY        Backend secret key for Docker mode. Default: change-me-before-public-use
 
 Examples:
   ./scripts/install.sh --docker
+  ./scripts/install.sh --docker --autostart
   ADMIN_PASSWORD='change-me' ./scripts/install.sh --local
   ./scripts/install.sh --local --no-start
 USAGE
@@ -41,6 +44,9 @@ while [ "$#" -gt 0 ]; do
       ;;
     --no-start)
       START_SERVICES="0"
+      ;;
+    --autostart)
+      ENABLE_AUTOSTART="1"
       ;;
     -h|--help)
       usage
@@ -77,20 +83,29 @@ install_docker() {
   need_cmd docker
   docker compose version >/dev/null
   cd "$ROOT_DIR"
-  ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" docker compose -f infra/docker-compose.yml build
+  ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" HOST_IP="$HOST_IP" docker compose -f infra/docker-compose.yml build
   if [ "$START_SERVICES" = "1" ]; then
-    ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" docker compose -f infra/docker-compose.yml up -d
+    ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" HOST_IP="$HOST_IP" docker compose -f infra/docker-compose.yml up -d
     echo
     echo "Started with Docker Compose:"
-    echo "  Frontend: http://localhost:5173"
-    echo "  Backend:  http://localhost:8001"
+    echo "  Frontend: http://${HOST_IP}:5173"
+    echo "  Backend:  http://${HOST_IP}:8001"
   else
     echo "Docker images built. Start later with:"
-    echo "  ADMIN_EMAIL='$ADMIN_EMAIL' ADMIN_PASSWORD='***' docker compose -f infra/docker-compose.yml up -d"
+    echo "  ADMIN_EMAIL='$ADMIN_EMAIL' ADMIN_PASSWORD='***' HOST_IP='$HOST_IP' docker compose -f infra/docker-compose.yml up -d"
+  fi
+
+  if [ "$ENABLE_AUTOSTART" = "1" ]; then
+    ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" HOST_IP="$HOST_IP" START_NOW="$START_SERVICES" "$ROOT_DIR/scripts/install-autostart.sh"
   fi
 }
 
 install_local() {
+  if [ "$ENABLE_AUTOSTART" = "1" ]; then
+    echo "--autostart is supported only with --docker. Local mode uses foreground dev services." >&2
+    exit 2
+  fi
+
   need_cmd python3
   need_cmd npm
   cd "$ROOT_DIR"
